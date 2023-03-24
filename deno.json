@@ -1,0 +1,9 @@
+{
+  "imports": {
+    "@handlers/": "./src/handlers/"
+  , "@env/": "./src/env/"
+  , "@apis/": "./src/apis/"
+  , "@src/": "./src/"
+  , "@test/": "./tests/"
+  }
+}
