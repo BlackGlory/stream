@@ -366,7 +366,7 @@
 
 "@blackglory/observe@^0.2.0":
   version "0.2.0"
-  resolved "https://registry.npmjs.org/@blackglory/observe/-/observe-0.2.0.tgz"
+  resolved "https://registry.yarnpkg.com/@blackglory/observe/-/observe-0.2.0.tgz#12d64c5265208f3188ca20dc46ec756a37d70b51"
   integrity sha512-LmsoBUqaQw0z8ek0e6z+rZx/OHDGA7n2NP4XQH55s0uyoI+Fun222PAHqUCTerz8tlf3XQA9n8LPADm4gk/YFw==
   dependencies:
     iterable-operator "^4.0.3"
@@ -456,7 +456,7 @@
 
 "@blackglory/wait-for@^0.7.3":
   version "0.7.3"
-  resolved "https://registry.npmjs.org/@blackglory/wait-for/-/wait-for-0.7.3.tgz"
+  resolved "https://registry.yarnpkg.com/@blackglory/wait-for/-/wait-for-0.7.3.tgz#cdca2a7bba5b57fcfbfdced176b61434b1a7f119"
   integrity sha512-XDlfrBlOyeLnfESnrerUl2ShgAbQInjG3mydDAEOpRNj62j84dFYG7r8tSXrMqsDvPouzBr8+ntlaHLSCQ7A2Q==
   dependencies:
     "@blackglory/observe" "^0.2.0"

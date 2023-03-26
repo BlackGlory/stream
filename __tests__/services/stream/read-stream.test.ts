@@ -10,7 +10,6 @@ import { delay } from 'extra-promise'
 import { getErrorPromise, toResultPromise } from 'return-style'
 import { hasStream } from '@dao/stream.js'
 import { toNodeJSReadable } from '@test/utils.js'
-import { waitForFunction } from '@blackglory/wait-for'
 
 beforeEach(startService)
 afterEach(stopService)
@@ -95,7 +94,8 @@ describe('read stream', () => {
       yield 'data-1'
       await delay(1000)
       yield 'data-2'
-    }))).catch(pass)
+    })))
+    promise.catch(pass)
 
     const res = await fetch(get(
       url(getAddress())
@@ -106,7 +106,7 @@ describe('read stream', () => {
     expect(res.status).toBe(200)
     expect(res.headers.get('content-type')).toBe('application/octet-stream')
     expect(await getErrorPromise(toText(res))).toBeInstanceOf(AbortError)
-    await promise
+    expect((await getErrorPromise(promise))?.message).toBe('Premature close')
     expect(hasStream(id)).toBe(false)
   })
 

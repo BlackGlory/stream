@@ -38,7 +38,6 @@
   "devDependencies": {
     "@blackglory/http-status": "^2.0.1",
     "@blackglory/jest-resolver": "^0.3.0",
-    "@blackglory/wait-for": "^0.7.3",
     "@commitlint/cli": "^17.5.0",
     "@commitlint/config-conventional": "^17.4.4",
     "@types/jest": "29.5.0",
@@ -74,6 +73,7 @@
     "16": "^0.0.2",
     "@blackglory/errors": "^3.0.0",
     "@blackglory/prelude": "^0.3.1",
+    "@blackglory/wait-for": "^0.7.3",
     "@fastify/cors": "^8.2.1",
     "dotenv": "^16.0.3",
     "extra-abort": "^0.3.4",
