@@ -7,7 +7,7 @@ import { toNodeJSReadable } from '@test/utils.js'
 import { text } from 'stream/consumers'
 import { AbortError } from 'extra-abort'
 
-afterEach(() => deleteAllStreams())
+afterEach(deleteAllStreams)
 
 describe('createStream', () => {
   test('stream exists', () => {
@@ -40,7 +40,7 @@ describe('createStream', () => {
 
         await delay(900)
         expect(hasStream(id)).toBe(true)
-        await delay(1000)
+        await delay(200)
         expect(hasStream(id)).toBe(false)
       })
     })
@@ -315,11 +315,11 @@ describe('writeStream', () => {
   })
 })
 
-test('deleteAllStreams', () => {
+test('deleteAllStreams', async () => {
   const id = 'id'
   createStream(id, { timeToLive: null })
 
-  deleteAllStreams()
+  await deleteAllStreams()
 
   expect(hasStream(id)).toBe(false)
 })

@@ -17,7 +17,7 @@ export async function startService() {
 }
 
 export async function stopService() {
-  deleteAllStreams()
+  await deleteAllStreams()
   await server.close()
   resetEnvironment()
 }

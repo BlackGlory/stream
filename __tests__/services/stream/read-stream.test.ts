@@ -91,7 +91,7 @@ describe('read stream', () => {
   test('edge: Readable is closed before pipe is done', async () => {
     const id = 'id'
     API.createStream(id, { timeToLive: null })
-    API.writeStream(id, toNodeJSReadable(go(async function* () {
+    const promise = API.writeStream(id, toNodeJSReadable(go(async function* () {
       yield 'data-1'
       await delay(1000)
       yield 'data-2'
@@ -106,7 +106,8 @@ describe('read stream', () => {
     expect(res.status).toBe(200)
     expect(res.headers.get('content-type')).toBe('application/octet-stream')
     expect(await getErrorPromise(toText(res))).toBeInstanceOf(AbortError)
-    await waitForFunction(() => hasStream(id) === false)
+    await promise
+    expect(hasStream(id)).toBe(false)
   })
 
   test('edge: Writable is closed before pipe is done', async () => {

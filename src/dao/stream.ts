@@ -3,6 +3,8 @@ import { isNumber, go, toArray, pass } from '@blackglory/prelude'
 import { IStreamConfiguration, StreamLocked, StreamNotFound, StreamTimeout } from '@src/contract.js'
 import { PassThrough, Readable } from 'stream'
 import { pipeline } from 'stream/promises'
+import { AbortError } from 'extra-abort'
+import { waitForAllMacrotasksProcessed } from '@blackglory/wait-for'
 
 interface IStream {
   id: string
@@ -24,7 +26,9 @@ export function createStream(id: string, config: IStreamConfiguration): void {
     const cancelSchedule: (() => void) | undefined = go(() => {
       if (isNumber(config.timeToLive)) {
         return setTimeout(config.timeToLive, () => {
-          deleteStream(stream, new StreamTimeout())
+          if (!stream.port.destroyed) {
+            stream.port.destroy(new StreamTimeout())
+          }
         })
       }
     })
@@ -33,7 +37,10 @@ export function createStream(id: string, config: IStreamConfiguration): void {
       allowHalfOpen: false
     })
     port.once('error', pass)
-    port.once('close', () => deleteStream(stream))
+    port.once('close', () => {
+      cancelSchedule?.()
+      idToStream.delete(stream.id)
+    })
 
     const stream: IStream = {
       id
@@ -75,7 +82,7 @@ export function readStream(id: string): Readable {
  */
 export async function writeStream(
   id: string
-, readable: Readable
+, payload: Readable
 ): Promise<void> {
   const stream = idToStream.get(id)
   if (stream) {
@@ -84,29 +91,26 @@ export async function writeStream(
     } else {
       stream.writeLocked = true
 
-      readable.once('close', () => {
-        if (stream.readLocked) {
-          deleteStream(stream)
+      payload.once('error', e => {
+        if (!stream.port.destroyed) {
+          stream.port.destroy(e)
         }
       })
-      await pipeline(readable, stream.port)
+      await pipeline(payload, stream.port)
     }
   } else {
     throw new StreamNotFound()
   }
 }
 
-function deleteStream(stream: IStream, reason?: Error): void {
-  stream.cancelSchedule?.()
-
-  stream.port.destroy(reason)
-
-  if (idToStream.get(stream.id) === stream) {
-    idToStream.delete(stream.id)
-  }
-}
-
-export function deleteAllStreams(): void {
+export async function deleteAllStreams(): Promise<void> {
   const streams = toArray(idToStream.values())
-  streams.forEach(stream => deleteStream(stream))
+
+  streams.forEach(stream => {
+    if (!stream.port.destroyed) {
+      stream.port.destroy(new AbortError())
+    }
+  })
+
+  await waitForAllMacrotasksProcessed()
 }
