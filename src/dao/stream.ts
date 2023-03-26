@@ -1,6 +1,6 @@
 import { setTimeout } from 'extra-timers'
-import { isNumber, go, toArray } from '@blackglory/prelude'
-import { IStreamConfiguration, StreamLocked, StreamNotFound } from '@src/contract.js'
+import { isNumber, go, toArray, pass } from '@blackglory/prelude'
+import { IStreamConfiguration, StreamLocked, StreamNotFound, StreamTimeout } from '@src/contract.js'
 import { PassThrough, Readable } from 'stream'
 import { pipeline } from 'stream/promises'
 
@@ -23,13 +23,16 @@ export function createStream(id: string, config: IStreamConfiguration): void {
   } else {
     const cancelSchedule: (() => void) | undefined = go(() => {
       if (isNumber(config.timeToLive)) {
-        return setTimeout(config.timeToLive, () => deleteStream(stream))
+        return setTimeout(config.timeToLive, () => {
+          deleteStream(stream, new StreamTimeout())
+        })
       }
     })
 
     const port = new PassThrough({
       allowHalfOpen: false
     })
+    port.once('error', pass)
     port.once('close', () => deleteStream(stream))
 
     const stream: IStream = {
@@ -93,10 +96,10 @@ export async function writeStream(
   }
 }
 
-function deleteStream(stream: IStream): void {
+function deleteStream(stream: IStream, reason?: Error): void {
   stream.cancelSchedule?.()
 
-  stream.port.destroy()
+  stream.port.destroy(reason)
 
   if (idToStream.get(stream.id) === stream) {
     idToStream.delete(stream.id)
@@ -105,5 +108,5 @@ function deleteStream(stream: IStream): void {
 
 export function deleteAllStreams(): void {
   const streams = toArray(idToStream.values())
-  streams.forEach(deleteStream)
+  streams.forEach(stream => deleteStream(stream))
 }

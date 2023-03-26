@@ -27,3 +27,4 @@ export interface IAPI {
 
 export class StreamLocked extends CustomError {}
 export class StreamNotFound extends CustomError {}
+export class StreamTimeout extends CustomError {}
