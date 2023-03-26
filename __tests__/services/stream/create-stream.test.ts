@@ -47,11 +47,12 @@ describe('create stream', () => {
 
       test('timeToLive isnt null', async () => {
         const id = 'id'
+        const timeToLive = 1000
 
         const res = await fetch(put(
           url(getAddress())
         , pathname(`/streams/${id}`)
-        , json<IStreamConfiguration>({ timeToLive: 1000 })
+        , json<IStreamConfiguration>({ timeToLive })
         ))
 
         expect(res.status).toBe(204)

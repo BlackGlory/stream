@@ -9,7 +9,7 @@ import { AbortError, timeoutSignal } from 'extra-abort'
 import { delay } from 'extra-promise'
 import { getErrorPromise, toResultPromise } from 'return-style'
 import { hasStream } from '@dao/stream.js'
-import { toNodeJSReadable } from './utils.js'
+import { toNodeJSReadable } from '@test/utils.js'
 import { waitForFunction } from '@blackglory/wait-for'
 
 beforeEach(startService)
@@ -33,7 +33,7 @@ describe('read stream', () => {
     test('stream is locked', async () => {
       const id = 'id'
       API.createStream(id, { timeToLive: null })
-      API.readStream(id)
+      const readable = API.readStream(id)
 
       const res = await fetch(get(
         url(getAddress())
@@ -112,17 +112,17 @@ describe('read stream', () => {
   test('edge: Writable is closed before pipe is done', async () => {
     const id = 'id'
     API.createStream(id, { timeToLive: null })
-    const readable = toNodeJSReadable(go(async function* () {
+    const payload = toNodeJSReadable(go(async function* () {
       yield 'data-1'
       await delay(1000)
       yield 'data-2'
     }))
-    API.writeStream(id, readable).catch(pass)
+    API.writeStream(id, payload).catch(pass)
 
     // eslint-disable-next-line
     queueMicrotask(async () => {
       await delay(500)
-      readable.destroy()
+      payload.destroy()
     })
     const res = await fetch(get(
       url(getAddress())
@@ -138,13 +138,13 @@ describe('read stream', () => {
   test('edge: Writable is closed before Readable is created', async () => {
     const id = 'id'
     API.createStream(id, { timeToLive: null })
-    const readable = toNodeJSReadable(go(async function* () {
+    const payload = toNodeJSReadable(go(async function* () {
       yield 'data-1'
       await delay(1000)
       yield 'data-2'
     }))
-    API.writeStream(id, readable).catch(pass)
-    readable.destroy()
+    API.writeStream(id, payload).catch(pass)
+    payload.destroy()
 
     const res = await fetch(get(
       url(getAddress())

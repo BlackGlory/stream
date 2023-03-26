@@ -2,6 +2,7 @@ import { resetCache } from '@env/cache.js'
 import { buildServer } from '@src/server.js'
 import { UnpackedPromise } from 'hotypes'
 import { deleteAllStreams } from '@dao/stream.js'
+import { Readable } from 'stream'
 
 let server: UnpackedPromise<ReturnType<typeof buildServer>>
 let address: string
@@ -24,4 +25,10 @@ export async function stopService() {
 export function resetEnvironment() {
   // reset memoize
   resetCache()
+}
+
+export function toNodeJSReadable<T>(
+  iterable: Iterable<T> | AsyncIterable<T>
+): Readable {
+  return Readable.from(iterable)
 }

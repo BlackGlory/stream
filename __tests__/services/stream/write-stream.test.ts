@@ -4,12 +4,12 @@ import { url, pathname, body, signal, header } from 'extra-request/transformers'
 import { toText } from 'extra-response'
 import { API } from '@apis/index.js'
 import { startService, stopService, getAddress } from '@test/utils.js'
-import { go } from '@blackglory/prelude'
+import { go, pass } from '@blackglory/prelude'
 import { delay } from 'extra-promise'
 import { AbortError, timeoutSignal } from 'extra-abort'
 import { getErrorPromise } from 'return-style'
 import { hasStream } from '@dao/stream.js'
-import { toNodeJSReadable } from './utils.js'
+import { toNodeJSReadable } from '@test/utils.js'
 import { text } from 'stream/consumers'
 
 beforeEach(startService)
@@ -41,7 +41,7 @@ describe('write stream', () => {
       // eslint-disable-next-line
       API.writeStream(id, toNodeJSReadable(go(function* () {
         yield 'data'
-      })))
+      }))).catch(pass)
       const payload = toNodeJSReadable(go(function* () {
         yield 'data'
       }))

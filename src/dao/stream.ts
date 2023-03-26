@@ -93,7 +93,7 @@ export async function writeStream(
   }
 }
 
-export function deleteStream(stream: IStream): void {
+function deleteStream(stream: IStream): void {
   stream.cancelSchedule?.()
 
   stream.port.destroy()
