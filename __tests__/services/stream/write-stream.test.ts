@@ -105,58 +105,83 @@ describe('write stream', () => {
         expect(await receivedPayload).toBe(['data'].join(''))
         expect(hasStream(id)).toBe(false)
       })
-
-      test('Writable is closed before pipe is done', async () => {
-        const id = 'id'
-        API.createStream(id, { timeToLive: null })
-        const readable = API.readStream(id)
-        const receivedPayload = text(readable)
-        const payload = toNodeJSReadable(go(async function* () {
-          yield 'data-1'
-          await delay(1000)
-          yield 'data-2'
-        }))
-
-        const err = await getErrorPromise(fetch(post(
-          url(getAddress())
-        , pathname(`/streams/${id}`)
-        , header('content-type', 'application/octet-stream')
-        , body(payload)
-        , signal(timeoutSignal(500))
-        )))
-
-        expect(err).toBeInstanceOf(AbortError)
-        expect((await getErrorPromise(receivedPayload))?.message).toBe('aborted')
-        expect(hasStream(id)).toBe(false)
-      })
-
-      test('Readable is closed before pipe is done', async () => {
-        const id = 'id'
-        API.createStream(id, { timeToLive: null })
-        const readable = API.readStream(id)
-        const receivedPayload = text(readable)
-        const payload = toNodeJSReadable(go(async function* () {
-          yield 'data-1'
-          await delay(1000)
-          yield 'data-2'
-        }))
-
-        // eslint-disable-next-line
-        queueMicrotask(async () => {
-          await delay(500)
-          readable.destroy()
-        })
-        const err = await getErrorPromise(fetch(post(
-          url(getAddress())
-        , pathname(`/streams/${id}`)
-        , header('content-type', 'application/octet-stream')
-        , body(payload)
-        )))
-
-        expect(err?.name).toBe('FetchError')
-        expect(await receivedPayload).toBe(['data-1'].join(''))
-        expect(hasStream(id)).toBe(false)
-      })
     })
+  })
+
+  test('edge: Writable is closed before pipe is done', async () => {
+    const id = 'id'
+    API.createStream(id, { timeToLive: null })
+    const readable = API.readStream(id)
+    const receivedPayload = text(readable)
+    const payload = toNodeJSReadable(go(async function* () {
+      yield 'data-1'
+      await delay(1000)
+      yield 'data-2'
+    }))
+
+    const err = await getErrorPromise(fetch(post(
+      url(getAddress())
+    , pathname(`/streams/${id}`)
+    , header('content-type', 'application/octet-stream')
+    , body(payload)
+    , signal(timeoutSignal(500))
+    )))
+
+    expect(err).toBeInstanceOf(AbortError)
+    expect((await getErrorPromise(receivedPayload))?.message).toBe('aborted')
+    expect(hasStream(id)).toBe(false)
+  })
+
+  test('edge: Readable is closed before pipe is done', async () => {
+    const id = 'id'
+    API.createStream(id, { timeToLive: null })
+    const readable = API.readStream(id)
+    const receivedPayload = text(readable)
+    const payload = toNodeJSReadable(go(async function* () {
+      yield 'data-1'
+      await delay(1000)
+      yield 'data-2'
+    }))
+
+    // eslint-disable-next-line
+    queueMicrotask(async () => {
+      await delay(500)
+      readable.destroy()
+    })
+    const err = await getErrorPromise(fetch(post(
+      url(getAddress())
+    , pathname(`/streams/${id}`)
+    , header('content-type', 'application/octet-stream')
+    , body(payload)
+    )))
+
+    expect(err?.name).toBe('FetchError')
+    expect(await receivedPayload).toBe(['data-1'].join(''))
+    expect(hasStream(id)).toBe(false)
+  })
+
+  test('edge: Readable is closed before Writable is created', async () => {
+    const id = 'id'
+    API.createStream(id, { timeToLive: null })
+    const readable = API.readStream(id)
+    const receivedPayload = text(readable)
+    const payload = toNodeJSReadable(go(async function* () {
+      yield 'data-1'
+      await delay(1000)
+      yield 'data-2'
+    }))
+    readable.destroy()
+
+    const res = await fetch(post(
+      url(getAddress())
+    , pathname(`/streams/${id}`)
+    , header('content-type', 'application/octet-stream')
+    , body(payload)
+    ))
+
+    expect(res.status).toBe(404)
+    expect(await toText(res)).toBe('')
+    expect(await receivedPayload).toBe('')
+    expect(hasStream(id)).toBe(false)
   })
 })

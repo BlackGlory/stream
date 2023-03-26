@@ -25,15 +25,16 @@ export const routes: FastifyPluginAsync<{ API: IAPI }> = async (server, { API })
 
       try {
         await API.writeStream(id, req.raw)
-        return reply
-          .status(204)
-          .send()
       } catch (e) {
         if (e instanceof StreamNotFound) return reply.status(404).send()
         if (e instanceof StreamLocked) return reply.status(409).send()
 
         throw e
       }
+
+      return reply
+        .status(204)
+        .send()
     }
   )
 }
