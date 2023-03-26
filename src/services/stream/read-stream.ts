@@ -2,6 +2,7 @@ import { FastifyPluginAsync } from 'fastify'
 import { IAPI, StreamLocked, StreamNotFound } from '@src/contract.js'
 import { idSchema } from '@src/schema.js'
 import { pipeline } from 'stream/promises'
+import { pass } from '@blackglory/prelude'
 
 export const routes: FastifyPluginAsync<{ API: IAPI }> = async (server, { API }) => {
   server.get<{
@@ -35,15 +36,7 @@ export const routes: FastifyPluginAsync<{ API: IAPI }> = async (server, { API })
 
         reply.raw.setHeader('content-type', 'application/octet-stream')
         reply.raw.flushHeaders()
-        pipeline(readable, reply.raw).catch((e: Error) => {
-          if (!reply.raw.destroyed) {
-            reply.raw.destroy(e)
-          }
-
-          if (!readable.destroyed) [
-            readable.destroy(e)
-          ]
-        })
+        pipeline(readable, reply.raw).catch(pass)
       } catch (e) {
         if (e instanceof StreamNotFound) return reply.status(404).send()
         if (e instanceof StreamLocked) return reply.status(409).send()
