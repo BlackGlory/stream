@@ -91,11 +91,6 @@ export async function writeStream(
     } else {
       stream.writeLocked = true
 
-      payload.once('error', e => {
-        if (!stream.port.destroyed) {
-          stream.port.destroy(e)
-        }
-      })
       await pipeline(payload, stream.port)
     }
   } else {
