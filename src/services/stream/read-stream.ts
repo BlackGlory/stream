@@ -23,16 +23,6 @@ export const routes: FastifyPluginAsync<{ API: IAPI }> = async (server, { API })
 
       try {
         const readable = API.readStream(id)
-        readable.once('error', e => {
-          if (!reply.raw.destroyed) {
-            reply.raw.destroy(e)
-          }
-        })
-        reply.raw.once('error', e => {
-          if (!readable.destroyed) [
-            readable.destroy(e)
-          ]
-        })
 
         reply.raw.setHeader('content-type', 'application/octet-stream')
         reply.raw.flushHeaders()
