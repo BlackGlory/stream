@@ -5,6 +5,7 @@ import { StreamLocked, StreamNotFound } from '@src/contract.js'
 import { go, pass } from '@blackglory/prelude'
 import { toNodeJSReadable } from '@test/utils.js'
 import { text } from 'stream/consumers'
+import { AbortError } from 'extra-abort'
 
 afterEach(() => deleteAllStreams())
 
@@ -133,11 +134,11 @@ describe('readStream', () => {
     // eslint-disable-next-line
     queueMicrotask(async () => {
       await delay(500)
-      readable.destroy()
+      readable.destroy(new AbortError())
     })
-    const result = await text(readable)
+    const err = await getErrorPromise(text(readable))
 
-    expect(result).toBe(['data-1'].join('')) // ?
+    expect(err).toBeInstanceOf(AbortError)
     expect(hasStream(id)).toBe(false)
   })
 
@@ -154,12 +155,12 @@ describe('readStream', () => {
     // eslint-disable-next-line
     queueMicrotask(async () => {
       await delay(500)
-      payload.destroy()
+      payload.destroy(new AbortError())
     })
     const readable = readStream(id)
-    const result = await text(readable)
+    const err = await getErrorPromise(text(readable))
 
-    expect(result).toBe(['data-1'].join('')) // ?
+    expect(err).toBeInstanceOf(AbortError)
     expect(hasStream(id)).toBe(false)
   })
 
@@ -172,12 +173,12 @@ describe('readStream', () => {
       yield 'data-2'
     }))
     writeStream(id, payload).catch(pass)
-    payload.destroy()
+    payload.destroy(new AbortError())
 
     const readable = readStream(id)
-    const result = await text(readable)
+    const err = await getErrorPromise(text(readable))
 
-    expect(result).toBe('') // ?
+    expect(err).toBeInstanceOf(AbortError)
     expect(hasStream(id)).toBe(false)
   })
 })
@@ -262,12 +263,12 @@ describe('writeStream', () => {
     // eslint-disable-next-line
     queueMicrotask(async () => {
       await delay(500)
-      payload.destroy()
+      payload.destroy(new AbortError())
     })
     const err = await getErrorPromise(writeStream(id, payload))
 
-    expect(err?.message).toBe('Premature close')
-    expect(await receivedPayload).toBe(['data-1'].join('')) // ?
+    expect(err).toBeInstanceOf(AbortError)
+    expect(await getErrorPromise(receivedPayload)).toBeInstanceOf(AbortError)
     expect(hasStream(id)).toBe(false)
   })
 
@@ -285,12 +286,12 @@ describe('writeStream', () => {
     // eslint-disable-next-line
     queueMicrotask(async () => {
       await delay(500)
-      readable.destroy()
+      readable.destroy(new AbortError())
     })
     const err = await getErrorPromise(writeStream(id, payload))
 
-    expect(err?.message).toBe('Premature close')
-    expect(await receivedPayload).toBe(['data-1'].join('')) // ?
+    expect(err).toBeInstanceOf(AbortError)
+    expect(await getErrorPromise(receivedPayload)).toBeInstanceOf(AbortError)
     expect(hasStream(id)).toBe(false)
   })
 
@@ -304,12 +305,12 @@ describe('writeStream', () => {
       await delay(1000)
       yield 'data-2'
     }))
-    readable.destroy()
+    readable.destroy(new AbortError())
 
     const err = await getErrorPromise(writeStream(id, payload))
 
-    expect(err?.message).toBe('Premature close')
-    expect(await receivedPayload).toBe('') // ?
+    expect(err).toBeInstanceOf(AbortError)
+    expect(await getErrorPromise(receivedPayload)).toBeInstanceOf(AbortError)
     expect(hasStream(id)).toBe(false)
   })
 })
