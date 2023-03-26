@@ -96,6 +96,9 @@ curl \
 ```js
 await fetch(`http://localhost:8080/streams/${id}`, {
   method: 'POST'
+, headers: {
+    'Content-Type': 'application/octet-stream'
+  }
 , body: payload
 })
 ```
