@@ -17,8 +17,6 @@ COPY package.json yarn.lock ./
 
 RUN yarn install --production \
  && yarn cache clean \
- && mkdir /data \
- && ln -s /data data \
  && apk add --update --no-cache \
       # healthcheck
       curl

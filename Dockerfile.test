@@ -9,8 +9,6 @@ RUN yarn install \
 COPY . ./
 
 RUN yarn build \
- && yarn bundle \
- && mkdir /data \
- && ln -s /data data
+ && yarn bundle
 
 ENTRYPOINT ["yarn"]
