@@ -1,6 +1,6 @@
 import { setTimeout } from 'extra-timers'
-import { isNumber, go } from '@blackglory/prelude'
-import { IConfig, StreamLocked, StreamNotFound } from '@src/contract.js'
+import { isNumber, go, toArray } from '@blackglory/prelude'
+import { IStreamConfiguration, StreamLocked, StreamNotFound } from '@src/contract.js'
 import { PassThrough, Readable } from 'stream'
 import { pipeline } from 'stream/promises'
 
@@ -17,7 +17,7 @@ const idToStream = new Map<string, IStream>()
 /**
  * @throws {StreamLocked}
  */
-export function createStream(id: string, config: IConfig): void {
+export function createStream(id: string, config: IStreamConfiguration): void {
   if (idToStream.has(id)) {
     throw new StreamLocked()
   } else {
@@ -95,6 +95,7 @@ export async function writeStream(
 
 export function deleteStream(stream: IStream): void {
   stream.cancelSchedule?.()
+
   stream.port.destroy()
 
   if (idToStream.get(stream.id) === stream) {
@@ -103,7 +104,6 @@ export function deleteStream(stream: IStream): void {
 }
 
 export function deleteAllStreams(): void {
-  for (const stream of idToStream.values()) {
-    deleteStream(stream)
-  }
+  const streams = toArray(idToStream.values())
+  streams.forEach(deleteStream)
 }

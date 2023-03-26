@@ -1,7 +1,8 @@
 import { CustomError } from '@blackglory/errors'
+import { JSONObject } from 'justypes'
 import { Readable } from 'stream'
 
-export interface IConfig {
+export interface IStreamConfiguration extends JSONObject {
   timeToLive: number | null
 }
 
@@ -9,7 +10,7 @@ export interface IAPI {
   /**
    * @throws {StreamLocked}
    */
-  createStream(id: string, config: IConfig): void
+  createStream(id: string, config: IStreamConfiguration): void
 
   /**
    * @throws {StreamLocked}

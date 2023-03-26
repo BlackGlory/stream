@@ -5,6 +5,8 @@ import { toText } from 'extra-response'
 import { API } from '@apis/index.js'
 import { startService, stopService, getAddress } from '@test/utils.js'
 import { hasStream } from '@dao/stream.js'
+import { delay } from 'extra-promise'
+import { IStreamConfiguration } from '@src/contract.js'
 
 beforeEach(startService)
 afterEach(stopService)
@@ -25,17 +27,40 @@ describe('create stream', () => {
     expect(hasStream(id)).toBe(true)
   })
 
-  test('stream does not exist', async () => {
-    const id = 'id'
+  describe('stream does not exist', () => {
+    describe('timeToLive', () => {
+      test('timeToLive is null', async () => {
+        const id = 'id'
+        const timeToLive = null
 
-    const res = await fetch(put(
-      url(getAddress())
-    , pathname(`/streams/${id}`)
-    , json({ timeToLive: null })
-    ))
+        const res = await fetch(put(
+          url(getAddress())
+        , pathname(`/streams/${id}`)
+        , json<IStreamConfiguration>({ timeToLive })
+        ))
 
-    expect(res.status).toBe(204)
-    expect(await toText(res)).toBe('')
-    expect(hasStream(id)).toBe(true)
+        expect(res.status).toBe(204)
+        expect(await toText(res)).toBe('')
+        await delay(1000)
+        expect(hasStream(id)).toBe(true)
+      })
+
+      test('timeToLive isnt null', async () => {
+        const id = 'id'
+
+        const res = await fetch(put(
+          url(getAddress())
+        , pathname(`/streams/${id}`)
+        , json<IStreamConfiguration>({ timeToLive: 1000 })
+        ))
+
+        expect(res.status).toBe(204)
+        expect(await toText(res)).toBe('')
+        await delay(900)
+        expect(hasStream(id)).toBe(true)
+        await delay(1100)
+        expect(hasStream(id)).toBe(false)
+      })
+    })
   })
 })

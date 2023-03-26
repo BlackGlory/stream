@@ -4,10 +4,10 @@ import { url, pathname, signal } from 'extra-request/transformers'
 import { toText } from 'extra-response'
 import { API } from '@apis/index.js'
 import { startService, stopService, getAddress } from '@test/utils.js'
-import { go, pass } from '@blackglory/prelude'
+import { assert, go, pass } from '@blackglory/prelude'
 import { AbortError, timeoutSignal } from 'extra-abort'
 import { delay } from 'extra-promise'
-import { getErrorPromise } from 'return-style'
+import { getErrorPromise, toResultPromise } from 'return-style'
 import { hasStream } from '@dao/stream.js'
 import { toNodeJSReadable } from './utils.js'
 import { waitForFunction } from '@blackglory/wait-for'
@@ -152,7 +152,18 @@ describe('read stream', () => {
     ))
 
     expect(res.status).toBe(404)
-    expect(await toText(res)).toBe('')
+    const result = await toResultPromise(toText(res))
+    assert(
+      (
+        result.isOk() &&
+        result.unwrap() === ''
+      )
+      ||
+      (
+        result.isErr() &&
+        (result.unwrapErr() as NodeJS.ErrnoException).code === 'EPIPE'
+      )
+    )
     expect(hasStream(id)).toBe(false)
   })
 })

@@ -1,5 +1,5 @@
 import { FastifyPluginAsync } from 'fastify'
-import { IAPI, IConfig, StreamLocked } from '@src/contract.js'
+import { IAPI, IStreamConfiguration, StreamLocked } from '@src/contract.js'
 import { idSchema } from '@src/schema.js'
 
 export const routes: FastifyPluginAsync<{ API: IAPI }> = async (server, { API }) => {
@@ -7,7 +7,7 @@ export const routes: FastifyPluginAsync<{ API: IAPI }> = async (server, { API })
     Params: {
       id: string
     }
-    Body: IConfig
+    Body: IStreamConfiguration
   }>(
     '/streams/:id'
   , {

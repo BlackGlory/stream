@@ -82,6 +82,7 @@
     "extra-tags": "^0.4.1",
     "extra-timers": "^0.2.5",
     "fastify": "^4.15.0",
+    "justypes": "^4.2.0",
     "value-getter": "^0.3.0",
     "you-died": "^0.4.3"
   }
