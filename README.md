@@ -6,8 +6,18 @@
 ```sh
 git clone https://github.com/BlackGlory/stream
 cd stream
-chmod u+x ./startup.sh
-./startup.sh
+yarn install
+yarn build
+yarn bundle
+yarn --silent start
+```
+
+### 从源代码构建
+```sh
+git clone https://github.com/BlackGlory/stream
+cd stream
+yarn install
+yarn docker:build
 ```
 
 ### Recipes

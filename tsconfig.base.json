@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "target": "ES2018"
+  , "module": "NodeNext"
+  , "moduleResolution": "NodeNext"
+  , "strict": true
+  , "esModuleInterop": true
+  , "skipLibCheck": true
+  , "baseUrl": "."
+  , "paths": {
+      "@src/*": ["src/*"]
+    , "@dao/*": ["src/dao/*"]
+    , "@apis/*": ["src/apis/*"]
+    , "@env/*": ["src/env/*"]
+    , "@utils/*": ["src/utils/*"]
+    , "@test/*": ["__tests__/*"]
+    , "@services/*": ["src/services/*"]
+    }
+  , "plugins" : [
+      {
+        "transform": "typescript-transform-paths"
+      , "exclude" : ["**/node_modules/**"]
+      }
+    , {
+        "transform": "typescript-transform-paths", "afterDeclarations": true
+      , "exclude" : ["**/node_modules/**"]
+      }
+    ]
+  }
+}

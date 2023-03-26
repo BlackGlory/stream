@@ -1,18 +1,10 @@
-import { IAPI } from '@src/contract.ts'
-import {
-  createStream
-, hasStream
-, readStream
-, writeStream
-, deleteStream
-, clearStreams
-} from './stream.ts'
+import { IAPI } from '@src/contract.js'
+import { createStream } from './create-stream.js'
+import { readStream } from './read-stream.js'
+import { writeStream } from './write-stream.js'
 
 export const API: IAPI = {
   createStream
-, hasStream
 , readStream
 , writeStream
-, deleteStream
-, clearStreams
 }

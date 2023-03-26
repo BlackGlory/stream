@@ -1,29 +1,61 @@
-import { serve } from 'https://deno.land/std@0.158.0/http/server.ts'
-import { AbortController } from 'https://esm.sh/extra-abort@0.3.2'
-import { Deferred } from 'https://esm.sh/extra-promise@6.0.5'
-import { handler } from '@handlers/index.ts'
+import fastify from 'fastify'
+import cors from '@fastify/cors'
+import { routes as stream } from '@services/stream/index.js'
+import { routes as robots } from '@services/robots/index.js'
+import { routes as health } from '@services/health/index.js'
+import { NODE_ENV, NodeEnv } from '@env/index.js'
+import { API } from '@apis/index.js'
+import { isntUndefined, isString } from '@blackglory/prelude'
+import { assert } from '@blackglory/errors'
+import semver from 'semver'
+import { getPackageFilename } from '@utils/get-package-filename.js'
+import { readJSONFile } from 'extra-filesystem'
 
-export async function startServer(hostname: string, port?: number): Promise<{
-  port: number
-  closeServer: () => Promise<void>
-}> {
-  const controller = new AbortController()
+type LoggerLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal'
 
-  const portPromise = new Deferred<number>()
-  const closePromise = serve(handler, {
-    hostname
-  , port
-  , signal: controller.signal
-  , onListen({ port }) {
-      portPromise.resolve(port)
+export async function buildServer() {
+  const KiB = 1024
+  const MiB = 1024 * KiB
+  const GiB = 1024 * MiB
+
+  const pkg = await readJSONFile<{ version: `${number}.${number}.${number}` }>(
+    getPackageFilename()
+  )
+
+  const server = fastify({
+    logger: getLoggerOptions()
+  , maxParamLength: 600
+  , bodyLimit: 1 * GiB
+  , forceCloseConnections: true
+  })
+
+  server.addHook('onRequest', async (req, reply) => {
+    // eslint-disable-next-line
+    reply.header('Cache-Control', 'private, no-cache')
+  })
+  server.addHook('onRequest', async (req, reply) => {
+    const acceptVersion = req.headers['accept-version']
+    if (isntUndefined(acceptVersion)) {
+      assert(isString(acceptVersion), 'Accept-Version must be string')
+      if (!semver.satisfies(pkg.version, acceptVersion)) {
+        return reply.status(400).send()
+      }
     }
   })
 
-  return {
-    port: await portPromise
-  , async closeServer() {
-      controller.abort()
-      await closePromise
-    }
+  await server.register(cors, { origin: true })
+  await server.register(stream, { API })
+  await server.register(robots)
+  await server.register(health)
+
+  return server
+}
+
+function getLoggerOptions(): { level: LoggerLevel } | boolean {
+  switch (NODE_ENV()) {
+    case NodeEnv.Test: return false
+    case NodeEnv.Production: return { level: 'error' }
+    case NodeEnv.Development: return { level: 'trace' }
+    default: return false
   }
 }

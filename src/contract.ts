@@ -1,32 +1,27 @@
-import { CustomError } from 'https://esm.sh/@blackglory/errors@3.0.0'
+import { CustomError } from '@blackglory/errors'
+import { Readable } from 'stream'
+
+export interface IConfig {
+  timeToLive: number | null
+}
 
 export interface IAPI {
   /**
    * @throws {StreamLocked}
    */
-  createStream(id: string, timeToLive: number | null): void
-
-  hasStream(id: string): boolean
+  createStream(id: string, config: IConfig): void
 
   /**
    * @throws {StreamLocked}
    * @throws {StreamNotFound}
    */
-  readStream(id: string): AsyncIterableIterator<Uint8Array>
+  readStream(id: string): Readable
 
   /**
    * @throws {StreamLocked}
    * @throws {StreamNotFound}
    */
-  writeStream(id: string, readable: ReadableStream<Uint8Array>): Promise<void>
-
-  /**
-   * @throws {StreamLocked}
-   * @throws {StreamNotFound}
-   */
-  deleteStream(id: string): Promise<void>
-
-  clearStreams(): Promise<void>
+  writeStream(id: string, readable: Readable): Promise<void>
 }
 
 export class StreamLocked extends CustomError {}

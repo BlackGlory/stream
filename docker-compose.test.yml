@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  test:
+    build:
+      dockerfile: Dockerfile.test
+      context: .
+      args:
+        - 'HTTP_PROXY'
+        - 'HTTPS_PROXY'
+    command: 'run-s test smoke'

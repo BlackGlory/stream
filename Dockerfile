@@ -1,16 +1,33 @@
-FROM denoland/deno:alpine-1.31.3 AS builder
+FROM node:16-alpine AS builder
 WORKDIR /usr/src/app
+COPY package.json yarn.lock ./
 
-RUN apk add --update --no-cache \
+RUN yarn install \
+ && yarn cache clean
+
+COPY . ./
+
+RUN yarn build \
+ && yarn bundle
+
+FROM node:16-alpine
+WORKDIR /usr/src/app
+COPY --from=builder /usr/src/app/dist /usr/src/app/dist
+COPY package.json yarn.lock ./
+
+RUN yarn install --production \
+ && yarn cache clean \
+ && mkdir /data \
+ && ln -s /data data \
+ && apk add --update --no-cache \
       # healthcheck
       curl
 
 COPY . ./
 
-RUN deno cache src/main.ts
-
 ENV STREAM_HOST=0.0.0.0
 ENV STREAM_PORT=8080
 EXPOSE 8080
 HEALTHCHECK CMD curl --fail http://localhost:8080/health || exit 1
-CMD ["run", "--allow-net", "--allow-env", "src/main.ts"]
+ENTRYPOINT ["yarn"]
+CMD ["--silent", "start"]

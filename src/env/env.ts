@@ -1,7 +1,25 @@
-import { isNumber } from 'https://esm.sh/extra-utils@5.1.0'
-import { ValueGetter } from 'https://esm.sh/value-getter@0.3.0'
-import { Getter } from 'https://esm.sh/justypes@4.2.0'
-import { getCache } from '@env/cache.ts'
+import { ValueGetter } from 'value-getter'
+import { isNumber } from '@blackglory/prelude'
+import { Getter } from '@blackglory/prelude'
+import { getCache } from '@env/cache.js'
+
+export enum NodeEnv {
+  Test
+, Development
+, Production
+}
+
+export const NODE_ENV: Getter<NodeEnv | undefined> =
+  env('NODE_ENV')
+    .convert(val => {
+      switch (val) {
+        case 'test': return NodeEnv.Test
+        case 'development': return NodeEnv.Development
+        case 'production': return NodeEnv.Production
+      }
+    })
+    .memoize(getCache)
+    .get()
 
 export const HOST: Getter<string> =
   env('STREAM_HOST')
@@ -17,7 +35,7 @@ export const PORT: Getter<number> =
     .get()
 
 function env(name: string): ValueGetter<string | undefined> {
-  return new ValueGetter(name, () => Deno.env.get(name))
+  return new ValueGetter(name, () => process.env[name])
 }
 
 function toInteger(val: string | number | undefined ): number | undefined {

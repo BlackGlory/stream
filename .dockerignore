@@ -58,8 +58,8 @@ typings/
 .env
 
 # Build
-/lib
-/dist
+lib
+dist
 
 # Data
-/data
+data
