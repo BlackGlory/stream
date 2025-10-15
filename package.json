@@ -21,10 +21,10 @@
     "docker:build": "docker build --tag stream .",
     "docker:test": "run-s docker:test:clean docker:test:build docker:test:run",
     "docker:coverage": "run-s docker:test:clean docker:test:build docker:test:coverage docker:test:clean",
-    "docker:test:build": "docker-compose --file docker-compose.test.yml build",
-    "docker:test:run": "docker-compose --file docker-compose.test.yml run --rm test",
-    "docker:test:coverage": "docker-compose --file docker-compose.test.yml run --rm coverage",
-    "docker:test:clean": "docker-compose --file docker-compose.test.yml down",
+    "docker:test:build": "docker compose --file docker-compose.test.yml build",
+    "docker:test:run": "docker compose --file docker-compose.test.yml run --rm test",
+    "docker:test:coverage": "docker compose --file docker-compose.test.yml run --rm coverage",
+    "docker:test:clean": "docker compose --file docker-compose.test.yml down",
     "release": "standard-version"
   },
   "husky": {
