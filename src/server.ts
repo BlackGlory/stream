@@ -29,6 +29,9 @@ export async function buildServer() {
   , forceCloseConnections: true
   })
 
+  // 全局移除默认的`text/plain`解析器.
+  server.removeContentTypeParser('text/plain')
+
   server.addHook('onRequest', async (req, reply) => {
     // eslint-disable-next-line
     reply.header('Cache-Control', 'private, no-cache')
