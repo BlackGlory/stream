@@ -5,8 +5,7 @@ import { routes as robots } from '@services/robots/index.js'
 import { routes as health } from '@services/health/index.js'
 import { NODE_ENV, NodeEnv } from '@env/index.js'
 import { API } from '@apis/index.js'
-import { isntUndefined, isString } from '@blackglory/prelude'
-import { assert } from '@blackglory/errors'
+import { isntString, isntUndefined } from '@blackglory/prelude'
 import semver from 'semver'
 import { getPackageFilename } from '@utils/get-package-filename.js'
 import { readJSONFile } from 'extra-filesystem'
@@ -39,7 +38,10 @@ export async function buildServer() {
   server.addHook('onRequest', async (req, reply) => {
     const acceptVersion = req.headers['accept-version']
     if (isntUndefined(acceptVersion)) {
-      assert(isString(acceptVersion), 'Accept-Version must be string')
+      if (isntString(acceptVersion)) {
+        return reply.status(400).send()
+      }
+
       if (!semver.satisfies(pkg.version, acceptVersion)) {
         return reply.status(400).send()
       }
