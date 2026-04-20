@@ -34,6 +34,8 @@ services:
 ```
 
 ## API
+所有API中的流id都需要满足此正则表达式: `^.{0,255}$`.
+
 ### create stream
 `PUT /streams/<id>`
 
