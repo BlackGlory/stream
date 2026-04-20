@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.3](https://github.com/BlackGlory/stream/compare/v0.1.2...v0.1.3) (2026-04-20)
+
+
+### Features
+
+* relax the regex associated with stream ids ([d7b7324](https://github.com/BlackGlory/stream/commit/d7b732498cb24a30fc05117f4e64b57bf8ff1404))
+
 ### [0.1.2](https://github.com/BlackGlory/stream/compare/v0.1.1...v0.1.2) (2026-02-16)
 
 
